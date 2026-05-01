@@ -1,186 +1,119 @@
-# Fresh-Segments-T-SQL-Customer-Interest-Analysis
+# Fresh Segments | T-SQL Case Study #8 - Danny Ma' 8 Week SQL Challenge
+
+## Overview
+Fresh Segments helps businesses understand how their customers behave online, specifically which interest segments their audience engages with and how that engagement stacks up against other clients on the platform.
+
+This is Case Study #8 from Danny Ma's [8 Week SQL Challenge](https://8weeksqlchallenge.com/case-study-8/). I worked through teh full analysis in T-SQL, starting from a messy raw table all the way through to index-level composition trends and business recommendations.
+
+## Dataset
+Two tables, straightforward structure:
+- interest_metrics - Monthly performance per interest - composition, index_value, ranking, percentile_ranking
+- interest_map - Maps interest_id to name, summary, created and modified dates
+
+Before diving into the analysis, it helps to udnerstand what these metrics actually mean:
+- composition - the percent of this client's customer list that interacted with a given interest in that month
+- index_value - how that composition compares to the average across ALL Fresh Segments clients for the same interest. A 6x index means this client's audience is 6 times more liekly to engage with that interest than the average client.
+- ranking/percentile_ranking - where the interest sits relative to others in the same month, based on index_value
+
+## Repo Structure
+Fresh-Segments-T-SQL-Customer-Interest-Analysis/
+|
+|---README.md                                            ← you are here
+|
+|
+|-- datasets/
+|    |-- interest_metrics.csv
+|    |-- interest_map.csv
+| [Download Here](./datasets/interest_map.csv) & [](./datasets/interest_metrics.csv)
+|
+|
+|--- Images/
+|    |-- data_type_modification_snip.png                 ← import settings reference
+| [View Here](./Images/)
+|
+|
+|-- 01_data_exploration_and_cleansing/   
+|    |-- data_exploration_and_cleansing.sql
+|    |-- README.md
+| [View Here](./01_data_exploration_and_cleansing/)
+|
+|
+|-- 02_interest_analysis/
+|    |-- interest_analysis.sql
+|    |-- README.md
+| [View Here](./02_interest_analysis/)
+|
+|
+|-- 03_segment_analysis/
+|    |-- segemnt_analysis.sql
+|    |-- README.md
+| [View Here](./03_segment_analysis/)
+|
+|
+|-- 04_index_analysis/
+     |-- index_analysis.sql
+     |-- README.md
+[View Here](./04_index_analysis/)
+
+Each folder has a .sql file to run that section in one go and a README with the query logic, outputs and interpretations for every question in that section.
+
+## Analysis  - Section by Section
+
+### 01 Data Exploration & Cleansing
+- Converted month_year from text to DATE using DATEFROMPARTS().
+- Identified and removed 1,194 null records (8.37% of dataset) after backup.
+- Confirmed O orphaned interest id values in metrics-all map cleanly to the Interest map table
+- Resolved 188 apparent month_year < created_at discrepancies, all fell within the same calendar month, no true data errors
+
+### 02 Interest Analysis
+- 480 interests appear across all 14 months - the most reliable segments for trend analysis.
+- Cumulative percentage analysis shows interests present 6+ months account for 90.85% of all records-used as the quality threshold.
+- Applying the threshold removes 400 records (3.06%) - minimal loss, meaningful quality gain.
+- Post-filter, healthy segment diversity is retained across all 14 months.
+
+### 03 Segment Analysis
+- Top composition interests are dominated by luxury travel, premium retail and fitness - Work Comes First Travelers peaks at 21.2% composition, Gym Equipment Owners at 18.82%.
+- Winter Apparel Shoppers holds a perfect average ranking of 1, highest index_value every single month it appeared.
+- 5 most volatile interests (led by Techies at 30.18 std dev) all follow the same pattern. Peaked in mid-2018, steadily declined through 2019. Directional, not random.
+- Customer profile: affluent, career-driven, health-conscious. Premium and lifestyle products will land. Budget messaging will not.
+
+### 04 Index Analysis
+- Work Comes First Travelers dominates the monthly top spot from September 2018 through February 2019, peaking at 9.14 avg composition in October 2018.
+- Alabama Trip Planners, Luxury Bedding Shoppers and Solar Energy Researchers appear most consistently, each in 10 out of 14 monthly top 10 lists.
+- Average top 10 composition peaks at 7.07 in October 2018 then drops sharply from May 2019 (falling to 2.43 by June). This is not individual interests declining, the entire top tier loses engagement.
+- 3-month rolling average confirms the trend, peaks at 8.58 in December 2018, declines to 2.77 by August 2019. A 70%+ fall that points to a structural issue, not seasonal issue.
+
+### SQL Concepts Used
+- `ALTER TABLE`, `UPDATE`, `DATEFROMPARTS()` --- Converting month year to proper DATE format
+- `SELECT INTO` --- Backup before deleting null records
+- `FULL OUTER JOIN` --- Orphan interest_id check across both tables
+- `CTEs` (multi-level) --- All complex queries throughout
+- `DECLARE` + `SET` --- Storing total count upfront for cleaner percentage calculations
+- `DENSE_RANK()`, `RANK()` with `OVER/PARTITION BY` --- Monthly rankings, peak composition leolation
+- `RANK()` over `ROW_NUMBER()` --- Deliberate choice to avoid silently dropping tied values
+- `SUM() OVER()` --- Cumulative percentage across total months
+- `MIN()`, `MAX()` as window functions --- Boundary value stamping without collapsing rows
+- `FIRST_VALUE()` --- Pulling month_year at min/max percentile boundaries
+- `LAG()` --- Previous month context for rolling average output
+- `STDEV()` --- Measuring volatility in percentile_ranking
+- `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` -- 3-month rolling average
+- `CONCAT()` --- Formatting "Interest: value" output
+- `TOP IN WITH TIES` --- retains all records tied
+- `DATETRUNC()` --- Month-level validation of created_at discrepancies
+
+### How to Run
+1. Import the CSVs, refer to the below screenshot for data type settings during import.
+
+   [Download CSV Files](./datasets/interest_map.csv) & [](./datasets/interest_metrics.csv)
+   
+   ![Data Type Modification](./Images/data_type_modification_snip.png)
+   
+2. Run 01_data_exploration_and_cleansing first. It modifies the interest_metrics table.
+3. Each folder's sql file runs that section independently after that.
+4. Written in T-SQL; minor adjustments needed for PostgreSQL (DATEFROMPARTS → MAKE_DATE, DATETRUNC syntax differs slightly)
+
+### Connect with me
+If you have any questions about this anaysis or want to discuss query optimization, feel free to reach out!
+[Linkedin](https://www.linkedin.com/in/purti1003/)
 
 
-### Data Exploration and Cleansing
-
-#### 1. Update the fresh_segments.interest_metrics table by modifying the month_year column to be a date data type with the start of the month
-
-```sql
-    UPDATE interest_metrics
-    SET month_year = NULL;
-
-    ALTER TABLE interest_metrics ALTER COLUMN month_year DATE;
-
-    UPDATE interest_metrics
-    SET month_year = DATEFROMPARTS(year, month, 1);
-```
-
-#### 2, What is count of records in the fresh_segments.interest_metrics for each month_year value sorted in chronological order (earliest to latest) with the null values appearing first?
-```sql
-    SELECT month_year, COUNT(*) AS no_of_records
-    FROM interest_metrics
-    GROUP BY month_year
-    ORDER BY month_year;
-```
-
-*Output -* 
-
-| month_year | no_of_records  |
-|------------|----------------|
-| NULL       | 1194           |
-| 2018-07-01 | 729            |
-| 2018-08-01 | 767            |
-| 2018-09-01 | 780            |
-| 2018-10-01 | 857            |
-| 2018-11-01 | 928            |
-| 2018-12-01 | 995            |
-| 2019-01-01 | 973            |
-| 2019-02-01 | 1121           |
-| 2019-03-01 | 1136           |
-| 2019-04-01 | 1099           |
-| 2019-05-01 | 857            |
-| 2019-06-01 | 824            |
-| 2019-07-01 | 864            |
-| 2019-08-01 | 1149           |
-
-
-*Interpretation - Count of rows having null as month_year is 1194.*
-
-
-
-#### 3. What do you think we should do with these null values in the fresh_segments.interest_metrics
-
-
-My recommendation would be to drop these records, Without interest_id and the date fields, there is no way to tell which interest the metrics belong to or when they were captured and thats the entire point of this dataset. Keeping them would only introduce noise into any time-based analysis downstream.
-Hence, dropping is a solution. However, its good to know the quantam first, we should document what percent we are removing before we drop.
-
-```sql
-    SELECT
-        CAST((COUNT(*)-COUNT(month_year))*100.0/COUNT(*) AS DECIMAL (5,2)) AS null_percentage,
-        COUNT(*) - COUNT(month_year) AS null_count
-    FROM interest_metrics;
-```
-*Output -*
-
-| null_percentage | null_count |
-|-----------------|------------|
-| 8.37            | 1194       |
-
-
-*Interprtation - The result is 8.37% and 1194 rows. Since total null percentage is less than 10%, the data can be deleted. But its always advised to keep a backup of the data.*
-
-Taking a backup - 
-```SQL
-    SELECT *
-    INTO interest_metrics_back
-    FROM interest_metrics;
-```
-Deleting required records - 
-
-```SQL
-    DELETE FROM interest_metrics
-    WHERE month_year IS NULL;
-```
-
-#### 4. How many interest_id values exist in the fresh_segments.interest_metrics table but not in the fresh_segments.interest_map table? What about the other way around?
-    
-```SQL
-    SELECT 
-        COUNT(DISTINCT m.interest_id) AS not_in_interest_map_table, 
-        COUNT(DISTINCT i.id) AS not_in_interest_metrics_table
-    FROM interest_metrics m
-    FULL OUTER JOIN interest_map i ON m.interest_id = i.id
-    WHERE m.interest_id IS NULL or i.id IS NULL
-```
-
-*Output -*
-
-| not_in_interest_map_table | not_in_interest_metrics_table |
-|---------------------------|-------------------------------|
-| 0                         | 7                             |
-
-
-*Interpretation - No interest_id that is there that is in interest_metrics but not in interest_map table. 
-The other way round, There are 7 such interest_metrics that are in interest_map table but not in interest_metrics table.*
-
-#### 5. Summarise the id values in the fresh_segments.interest_map by its total record count in this table
-
-```sql
-    SELECT
-        COUNT(id) AS total_ids,
-        COUNT(distinct id) AS total_distinct_ids
-    FROM interest_map;
-```
-*Output -*
-
-| total_ids | total_distinct_ids |
-|-----------|--------------------|
-| 1209      | 1209               |
-
-
-#### 6. What sort of table join should we perform for our analysis and why? Check your logic by checking the rows where interest_id = 21246 in your joined output and include all columns from fresh_segments.interest_metrics and all columns from fresh_segments.interest_map except from the id column.
-
-I would go with an Inner Join between interest_metrics and interest_map on interest_id = id. The reason is straightforward. Any interest_id in the metrics table that has no corresponding entry in the map table is unidentifiable. We can't name it, describe it or present it meaningfully to a client. Including it in the analysis would be like reporting on a segment that doesn't exist on paper.
-
-The interest_id = 21246 check confirms the logic holds, it appears in both tables, joins cleanly and returns a complete row with all metric and map columns intact. 
-If the join were producing unexpected nulls or duplicate rows on this ID, that would be a signal to revisit the relationship assumption. It doesn't, so we are good.
-
-```sql
-    SELECT m.*, i.interest_name, i.interest_summary, i.created_at, i.last_modified
-    FROM interest_map i
-    INNER JOIN interest_metrics m ON i.id = m.interest_id
-    WHERE m.interest_id = 21246;
-```
-
-*Output -*
-| month | year | month_year | interest_id | composition | index_value | ranking | percentile_ranking | interest_name                    | interest_summary                                      | created_at                  | last_modified               |
-|-------|------|------------|-------------|-------------|-------------|---------|--------------------|----------------------------------|-------------------------------------------------------|-----------------------------|-----------------------------|
-| 7     | 2018 | 2018-07-01 | 21246       | 2.26        | 0.65        | 722     | 0.96               | Readers of El Salvadoran Content | People reading news from El Salvadoran media sources. | 2018-06-11 17:50:00.0000000 | 2018-06-11 17:50:00.0000000 |
-| 8     | 2018 | 2018-08-01 | 21246       | 2.13        | 0.59        | 765     | 0.26               | Readers of El Salvadoran Content | People reading news from El Salvadoran media sources. | 2018-06-11 17:50:00.0000000 | 2018-06-11 17:50:00.0000000 |
-| 9     | 2018 | 2018-09-01 | 21246       | 2.06        | 0.61        | 774     | 0.77               | Readers of El Salvadoran Content | People reading news from El Salvadoran media sources. | 2018-06-11 17:50:00.0000000 | 2018-06-11 17:50:00.0000000 |
-| 10    | 2018 | 2018-10-01 | 21246       | 1.74        | 0.58        | 855     | 0.23               | Readers of El Salvadoran Content | People reading news from El Salvadoran media sources. | 2018-06-11 17:50:00.0000000 | 2018-06-11 17:50:00.0000000 |
-| 11    | 2018 | 2018-11-01 | 21246       | 2.25        | 0.78        | 908     | 2.16               | Readers of El Salvadoran Content | People reading news from El Salvadoran media sources. | 2018-06-11 17:50:00.0000000 | 2018-06-11 17:50:00.0000000 |
-| 12    | 2018 | 2018-12-01 | 21246       | 1.97        | 0.7         | 983     | 1.21               | Readers of El Salvadoran Content | People reading news from El Salvadoran media sources. | 2018-06-11 17:50:00.0000000 | 2018-06-11 17:50:00.0000000 |
-| 1     | 2019 | 2019-01-01 | 21246       | 2.05        | 0.76        | 954     | 1.95               | Readers of El Salvadoran Content | People reading news from El Salvadoran media sources. | 2018-06-11 17:50:00.0000000 | 2018-06-11 17:50:00.0000000 |
-| 2     | 2019 | 2019-02-01 | 21246       | 1.84        | 0.68        | 1109    | 1.07               | Readers of El Salvadoran Content | People reading news from El Salvadoran media sources. | 2018-06-11 17:50:00.0000000 | 2018-06-11 17:50:00.0000000 |
-| 3     | 2019 | 2019-03-01 | 21246       | 1.75        | 0.67        | 1123    | 1.14               | Readers of El Salvadoran Content | People reading news from El Salvadoran media sources. | 2018-06-11 17:50:00.0000000 | 2018-06-11 17:50:00.0000000 |
-| 4     | 2019 | 2019-04-01 | 21246       | 1.58        | 0.63        | 1092    | 0.64               | Readers of El Salvadoran Content | People reading news from El Salvadoran media sources. | 2018-06-11 17:50:00.0000000 | 2018-06-11 17:50:00.0000000 |
-
-*Interpretation - Returns clean rows with no unexpected nulls in the key columns, confirming the join logic is sound and we can proceed with this approach.*
-
-#### 7. Are there any records in your joined table where the month_year value is before the created_at value from the fresh_segments.interest_map table? Do you think these values are valid and why?
-```sql
-    WITH joined_table AS 
-    (SELECT m.*, i.interest_name, i.interest_summary, i.created_at, i.last_modified
-    FROM interest_map i
-    INNER JOIN interest_metrics m ON i.id = m.interest_id)
-
-    SELECT COUNT(*) AS true_errors
-    FROM joined_table
-    WHERE month_year < created_at;
-```
-
-*Output -*   
-| true_errors |
-|-------------|
-| 188         |
-
-
-*Interpretation - Yes, There are 188 records where month_year is earlier than created_at. This is probably because date for month_year for all the rows was set as '1', however they might have been created in the same month. To check the same -*
-```sql
-    WITH joined_table AS
-    (SELECT m.*, i.interest_name, i.interest_summary, i.created_at, i.last_modified
-    FROM interest_map i
-    INNER JOIN interest_metrics m ON i.id = m.interest_id)
-
-    SELECT COUNT(*) AS true_errors
-    FROM joined_table
-    WHERE month_year < DATETRUNC(month, created_at);
-```
-
-*Output -*
-| true_errors |
-|-------------|
-| 0           |
-
-*Interpretation - All the records fall within the same month. No true errors, all records are valid.*
