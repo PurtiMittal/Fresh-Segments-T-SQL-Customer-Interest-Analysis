@@ -21,9 +21,9 @@
  ### 2. Using this same total_months measure - calculate the cumulative percentage of all records starting at 14 months - which total_months value passes the 90% cumulative percentage value?
 
 - Built in two CTE layers:
-- First CTE counts how many months each interest appears across the datset.
-- Second CTE groups those counts to find how  many interests share each total_months_value.
-- The final SELECT adds a running cumulative sum and percentage using SUM() OVER(), ordered descending so we start from the most consistent interests (14 months) downward.
+- First `CTE` counts how many months each interest appears across the datset.
+- Second `CTE` groups those counts to find how  many interests share each total_months_value.
+- The final `SELECT` adds a running cumulative sum and percentage using `SUM()` `OVER()`, ordered descending so we start from the most consistent interests (14 months) downward.
 
 ```sql
     WITH month_counts AS
@@ -79,14 +79,14 @@
    SET @cnt = (SELECT COUNT(*) FROM interest_metrics);
 
    WITH interest_longevity AS
-   (SELECT interest_id, count(DISTINCT month_year) aAS total_months 
-   FROM interest_metrics
-   GROUP BY interest_id
-   HAVING COUNT(DISTINCT month_year) < 6)
+    (SELECT interest_id, count(DISTINCT month_year) aAS total_months 
+    FROM interest_metrics
+    GROUP BY interest_id
+    HAVING COUNT(DISTINCT month_year) < 6)
 
    SELECT 
-     COUNT(*) AS records_to_remove,
-     CAST(COUNT(*)*100.0/@cnt as DECIMAL (5,2)) AS percent_records_to_remove
+      COUNT(*) AS records_to_remove,
+      CAST(COUNT(*)*100.0/@cnt as DECIMAL (5,2)) AS percent_records_to_remove
    FROM interest_metrics m
    INNER JOIN interest_longevity l ON m.interest_id = l.interest_id;
 ```
@@ -115,7 +115,7 @@
 
 ### 5. After removing these interests - how many unique interests are there for each month?
 
-- The CTE filters to interests present in 6 or more months (our quality threshold)
+- The `CTE` filters to interests present in 6 or more months (our quality threshold)
 - We then join back to interest_metrics and count distinct interests per month_year to see what the cleaned dataset looks like month by month.
 - This gives us confidence that enough segment diversity remains in each month for the analysis to still be meaningful after the removal.
 ```SQL
