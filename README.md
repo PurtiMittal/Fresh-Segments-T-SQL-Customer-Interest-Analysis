@@ -3,7 +3,7 @@
 ## Overview
 Fresh Segments helps businesses understand how their customers behave online, specifically which interest segments their audience engages with and how that engagement stacks up against other clients on the platform.
 
-This is Case Study #8 from Danny Ma's [8 Week SQL Challenge](https://8weeksqlchallenge.com/case-study-8/). I worked through teh full analysis in T-SQL, starting from a messy raw table all the way through to index-level composition trends and business recommendations.
+This is Case Study #8 from Danny Ma's [8 Week SQL Challenge](https://8weeksqlchallenge.com/case-study-8/). I worked through the full analysis in T-SQL, starting from a messy raw table all the way through to index-level composition trends and business recommendations.
 
 ## Dataset
 Two tables, straightforward structure:
@@ -17,42 +17,79 @@ Before diving into the analysis, it helps to udnerstand what these metrics actua
 
 ## Repo Structure
 Fresh-Segments-T-SQL-Customer-Interest-Analysis/
+
 |
-|---README.md                                            ← you are here
+
+|---README.md                                               ← you are here
+
 |
+
 |
+
 |-- datasets/
+
 |    |-- interest_metrics.csv
+
 |    |-- interest_map.csv
+
 | [Download Here](./datasets/interest_map.csv) & [](./datasets/interest_metrics.csv)
+
 |
+
 |
+
 |--- Images/
+
 |    |-- data_type_modification_snip.png                 ← import settings reference
+
 | [View Here](./Images/)
+
 |
+
 |
+
 |-- 01_data_exploration_and_cleansing/   
+
 |    |-- data_exploration_and_cleansing.sql
+
 |    |-- README.md
+
 | [View Here](./01_data_exploration_and_cleansing/)
+
 |
+
 |
+
 |-- 02_interest_analysis/
+
 |    |-- interest_analysis.sql
+
 |    |-- README.md
+
 | [View Here](./02_interest_analysis/)
+
 |
+
 |
+
 |-- 03_segment_analysis/
+
 |    |-- segemnt_analysis.sql
+
 |    |-- README.md
+
 | [View Here](./03_segment_analysis/)
+
 |
+
 |
+
 |-- 04_index_analysis/
+
      |-- index_analysis.sql
+     
      |-- README.md
+
 [View Here](./04_index_analysis/)
 
 Each folder has a .sql file to run that section in one go and a README with the query logic, outputs and interpretations for every question in that section.
@@ -84,27 +121,27 @@ Each folder has a .sql file to run that section in one go and a README with the 
 - 3-month rolling average confirms the trend, peaks at 8.58 in December 2018, declines to 2.77 by August 2019. A 70%+ fall that points to a structural issue, not seasonal issue.
 
 ### SQL Concepts Used
-- `ALTER TABLE`, `UPDATE`, `DATEFROMPARTS()` --- Converting month year to proper DATE format
-- `SELECT INTO` --- Backup before deleting null records
-- `FULL OUTER JOIN` --- Orphan interest_id check across both tables
-- `CTEs` (multi-level) --- All complex queries throughout
-- `DECLARE` + `SET` --- Storing total count upfront for cleaner percentage calculations
-- `DENSE_RANK()`, `RANK()` with `OVER/PARTITION BY` --- Monthly rankings, peak composition leolation
-- `RANK()` over `ROW_NUMBER()` --- Deliberate choice to avoid silently dropping tied values
-- `SUM() OVER()` --- Cumulative percentage across total months
-- `MIN()`, `MAX()` as window functions --- Boundary value stamping without collapsing rows
-- `FIRST_VALUE()` --- Pulling month_year at min/max percentile boundaries
-- `LAG()` --- Previous month context for rolling average output
-- `STDEV()` --- Measuring volatility in percentile_ranking
-- `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` -- 3-month rolling average
-- `CONCAT()` --- Formatting "Interest: value" output
-- `TOP IN WITH TIES` --- retains all records tied
-- `DATETRUNC()` --- Month-level validation of created_at discrepancies
+- `ALTER TABLE`, `UPDATE`, `DATEFROMPARTS()` - Converting month year to proper DATE format
+- `SELECT INTO` - Backup before deleting null records
+- `FULL OUTER JOIN` - Orphan interest_id check across both tables
+- `CTEs` (multi-level) - All complex queries throughout
+- `DECLARE` + `SET` - Storing total count upfront for cleaner percentage calculations
+- `DENSE_RANK()`, `RANK()` with `OVER/PARTITION BY` - Monthly rankings, peak composition leolation
+- `RANK()` over `ROW_NUMBER()` - Deliberate choice to avoid silently dropping tied values
+- `SUM() OVER()` - Cumulative percentage across total months
+- `MIN()`, `MAX()` as window functions - Boundary value stamping without collapsing rows
+- `FIRST_VALUE()` - Pulling month_year at min/max percentile boundaries
+- `LAG()` - Previous month context for rolling average output
+- `STDEV()` - Measuring volatility in percentile_ranking
+- `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` - 3-month rolling average
+- `CONCAT()` - Formatting "Interest: value" output
+- `TOP IN WITH TIES` - retains all records tied
+- `DATETRUNC()` - Month-level validation of created_at discrepancies
 
 ### How to Run
 1. Import the CSVs, refer to the below screenshot for data type settings during import.
 
-   [Download CSV Files](./datasets/interest_map.csv) & [](./datasets/interest_metrics.csv)
+   [Download interest_map](./datasets/interest_map.csv) & [Download interest_metrics](./datasets/interest_metrics.csv)
    
    ![Data Type Modification](./Images/data_type_modification_snip.png)
    
