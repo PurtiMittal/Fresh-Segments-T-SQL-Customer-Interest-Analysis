@@ -197,10 +197,10 @@ All the 5 interests here are volatile segemnts, menaing thereby their index_valu
 | 43546       | Personalized Gift Shoppers             | 5.7                 | 73.15               | 2019-06-01                | 2019-03-01                |
 
 *Result-*
-*- All 5 show a clear pattern. They peaked early (mostly July-Nov 2018) and hit their lowest point much later (mid to late 2019).*
-*- This is a consistent fownward trend across all volatile segments, not random noise.*
-*- These are not unpredicatble segments. they were once high performers that declined steadily over time.*
-*- For Fresh Segments, this signals these interests may be losing relevance for this client's customer base, worth flagging before recommending them for future campaigns.*
+- *All 5 show a clear pattern. They peaked early (mostly July-Nov 2018) and hit their lowest point much later (mid to late 2019).*
+- *This is a consistent fownward trend across all volatile segments, not random noise.*
+- *These are not unpredicatble segments. they were once high performers that declined steadily over time.*
+- *For Fresh Segments, this signals these interests may be losing relevance for this client's customer base, worth flagging before recommending them for future campaigns.*
 
 ### 5. How would you describe our customers in this segment based off their composition and ranking values? What sort of products or services should we show to these customers and what should we avoid?
 
