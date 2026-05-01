@@ -53,7 +53,11 @@
 
 ```SQL
     WITH cte AS(
-      SELECT month_year, interest_id, CAST(composition/index_value AS DECIMAL (5,2)) AS avg_composition, DENSE_RANK() OVER(PARTITION BY month_year ORDER BY composition/index_value DESC) AS rnk
+      SELECT
+            month_year,
+            interest_id,
+            CAST(composition/index_value AS DECIMAL (5,2)) AS avg_composition,
+            DENSE_RANK() OVER(PARTITION BY month_year ORDER BY composition/index_value DESC) AS rnk
       FROM interest_metrics)
 
     SELECT TOP 1 WITH TIES c.interest_id, interest_name, COUNT(*) AS frequency
@@ -128,10 +132,10 @@
 - `CTE` calcualtes avg_composition per row and stamps the monthly maximum.
 - `MAX()` as a window function partitioned by month_year keeps all rows intact so we can filter to only the row where avg_composition = max in the outer query.
 - Outer query:
-- `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` gives a true 3-month rolling average of the monthly max avg_composition values ordered chronologically.
-- `LAG(interest_name,1)` and `LAG(interest_name,2)` pull the top interest name from 1 and 2 months prior respectively.
-- `CONCAT` combines the lagged name and value into the required format
-- Final `WHERE` restricts output to Sep 2018 to Aug 2019 as required.
+    - `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` gives a true 3-month rolling average of the monthly max avg_composition values ordered chronologically.
+    - `LAG(interest_name,1)` and `LAG(interest_name,2)` pull the top interest name from 1 and 2 months prior respectively.
+    - `CONCAT` combines the lagged name and value into the required format
+    - Final `WHERE` restricts output to Sep 2018 to Aug 2019 as required.
 
 ``` sql
   WITH CTE AS (
