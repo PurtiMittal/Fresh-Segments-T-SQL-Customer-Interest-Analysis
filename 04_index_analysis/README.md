@@ -11,7 +11,11 @@
 ```sql
 
     WITH cte AS(
-        SELECT month_year, interest_id, CAST(composition/index_value AS DECIMAL (5,2)) AS avg_composition, DENSE_RANK() OVER(PARTITION BY month_year ORDER BY (composition/index_value) DESC) AS rnk
+        SELECT
+            month_year,
+            interest_id,
+            CAST(composition/index_value AS DECIMAL (5,2)) AS avg_composition,
+            DENSE_RANK() OVER(PARTITION BY month_year ORDER BY (composition/index_value) DESC) AS rnk
         FROM interest_metrics)
 
     SELECT month_year, c.interest_id, i.interest_name, avg_composition, rnk
@@ -33,9 +37,6 @@
 | 2018-07-01 | 21060       | Family Adventures Travelers   | 4.85            | 8   |
 | 2018-07-01 | 21057       | Work Comes First Travelers    | 4.80            | 9   |
 | 2018-07-01 | 82          | HDTV Researchers              | 4.71            | 10  |
-
-
-
 
 *Result:*
 - *Work Comes First Travelers dominates Sep 2018 to Feb 2019, peaking at 9.14 in October.*
@@ -83,7 +84,11 @@
 
 ```SQL
     WITH cte AS (
-        SELECT month_year, interest_id, composition/index_value as avg_composition, DENSE_rANK() OVER(PARTITION BY month_year ORDER BY composition/index_value DESC) AS rnk
+        SELECT
+            month_year,
+            interest_id,
+            composition/index_value as avg_composition,
+            DENSE_rANK() OVER(PARTITION BY month_year ORDER BY composition/index_value DESC) AS rnk
         FROM interest_metrics)
 
     SELECT month_year, CAST(AVG(avg_composition) AS DECIMAL(5,2)) AS monthly_top_10_avg_composition
@@ -180,14 +185,13 @@
 
 ### 5. Provide a possible reason why the max average composition might change from month to month? Could it signal something is not quite right with the overall business model for Fresh Segments?
 
-- Month to month changes in max average composition are expected to some degree, different interests naturally peak at different times of the year.
-- Work Comes First Travelers peaking in autmn/winter season totally makes sense.
+- Month to month changes in max average composition are expected to some degree, different interests naturally peak at different times of the year. Work Comes First Travelers peaking in autmn/winter season totally makes sense.
 - What is not normal is the magnitude of the decline from early 2019 onwards. Max avg composition drops from 9.14 in Oct 2018 to 2.73 by Aug 2019, a fall of over 70%. This is not seasonality, this is structural.
 - Possible Reasons:
     - The client's customer base is shrinking or becoming less engaged over time.
     - The interest categories themselves may be losing relevance for this client's audience.
 
 
-For Fresh Segments' business model this is a concern worth raising.
-- Their value proposition is built on delivering actionable interest-level insights.
-- If composition values are consistently declining, the segments become less meaningful and harder to act on, which ultimately undermines client confidence in the platform.
+- For Fresh Segments' business model this is a concern worth raising.
+    - Their value proposition is built on delivering actionable interest-level insights.
+    - If composition values are consistently declining, the segments become less meaningful and harder to act on, which ultimately undermines client confidence in the platform.
