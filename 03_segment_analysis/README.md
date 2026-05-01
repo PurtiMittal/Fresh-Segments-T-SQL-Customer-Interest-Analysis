@@ -179,8 +179,8 @@ All the 5 interests here are volatile segemnts, menaing thereby their index_valu
       interest_name,
       MIN(percentile_ranking) OVER(PARTITION BY m.interest_id) AS min_percentile_rank,
       MAX(percentile_ranking) OVER(PARTITION BY m.interest_id) AS max_percentile_rank,
-      FIRST_VALUE(month_year)  OVER(PARTITION BY m.interest_id ORDER BY percentile_ranking ASC) AS min_percentile_rank_month,
-      FIRST_VALUE(month_year)  OVER(PARTITION BY m.interest_id ORDER BY percentile_ranking DESC) AS max_percentile_rank_month
+      FIRST_VALUE(month_year) OVER(PARTITION BY m.interest_id ORDER BY percentile_ranking ASC) AS min_percentile_rank_month,
+      FIRST_VALUE(month_year) OVER(PARTITION BY m.interest_id ORDER BY percentile_ranking DESC) AS max_percentile_rank_month
   FROM interest_metrics m
   INNER JOIN interest_map i ON i.id = m.interest_id
   INNER JOIN most_std_dev s ON s.interest_id = m.interest_id
@@ -208,10 +208,10 @@ All the 5 interests here are volatile segemnts, menaing thereby their index_valu
 - They are affluent, career-driven, health conscious. They travel for work, invest in their homes, buy quality over cheap. Work Comes First Travelers peaks at 21.2% composition.
 - Gym Equipment Owners at 18.82%. Luxury Hotel Guests, Luxury Retail Shoppers, Furniture Shoppers all in the top 10. Winter Apparel and Fitness Trackers hold the lowest average rankings in Q2, meaning they stay near the top month after month, not just occasionally.
 
-  *What to show them:*
-  - Luxury travel, premium fitness gear, high-end retail and apparel, home furnishings, beauty and cosmetics. They are already for these things.
+*What to show them:*
+- Luxury travel, premium fitness gear, high-end retail and apparel, home furnishings, beauty and cosmetics. They are already for these things.
 
     *What to avoid:*
-  - The bottom 10 tells us where this audience simply is not present.
-  - Very few of the client's customers are looking for budget mobile phones, satellite TV, loans or generic fitness content.
-  - Campaigns built around price comparison, budget deals or mass market wellness will reach the wrong people or nobody at all.
+- The bottom 10 tells us where this audience simply is not present.
+- Very few of the client's customers are looking for budget mobile phones, satellite TV, loans or generic fitness content.
+- Campaigns built around price comparison, budget deals or mass market wellness will reach the wrong people or nobody at all.
