@@ -17,7 +17,7 @@ Before diving into the analysis, it helps to udnerstand what these metrics actua
 
 ## Repo Structure
 Fresh-Segments-T-SQL-Customer-Interest-Analysis/
-
+```
 |
 |---README.md                                               ← you are here
 |
@@ -55,7 +55,7 @@ Fresh-Segments-T-SQL-Customer-Interest-Analysis/
      |-- index_analysis.sql
      |-- README.md
 [View Here](./04_index_analysis/)
-
+```
 
 Each folder has a .sql file to run that section in one go and a README with the query logic, outputs and interpretations for every question in that section.
 
