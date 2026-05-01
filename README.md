@@ -17,10 +17,10 @@
 
 #### 2 What is count of records in the fresh_segments.interest_metrics for each month_year value sorted in chronological order (earliest to latest) with the null values appearing first?
 ```sql
-SELECT month_year, COUNT(*) AS no_of_records
-FROM interest_metrics
-GROUP BY month_year
-ORDER BY month_year;
+    SELECT month_year, COUNT(*) AS no_of_records
+    FROM interest_metrics
+    GROUP BY month_year
+    ORDER BY month_year;
 ```
 
 *Output -* 
@@ -44,21 +44,20 @@ ORDER BY month_year;
 | 2019-08-01 | 1149           |
 
 
-
 *Interpretation - Count of rows having null as month_year is 1194.*
 
 
 
--- 3 What do you think we should do with these null values in the fresh_segments.interest_metrics
+#### 3 What do you think we should do with these null values in the fresh_segments.interest_metrics
 
-/* 
-My recommendation would be to drop these records, Without interest_id and the date fields, there is no way to tell which interest the metrics belong to or when they captured and thats the entire point of this dataset. Keeping them would only introduce noise into any time-based analysis downstream.
-Hence, dropping is a solution. However, its good to know the quantam first, we should document what percent we are removing before we drop.
-*/
 
-select cast((count(*)-count(month_year))*100.0/count(*) as decimal (5,2)) as null_percentage, count(*) - count(month_year) as null_count
+*My recommendation would be to drop these records, Without interest_id and the date fields, there is no way to tell which interest the metrics belong to or when they were captured and thats the entire point of this dataset. Keeping them would only introduce noise into any time-based analysis downstream.
+Hence, dropping is a solution. However, its good to know the quantam first, we should document what percent we are removing before we drop.*
+
+```sql
+    SELECT cast((count(*)-count(month_year))*100.0/count(*) as decimal (5,2)) as null_percentage, count(*) - count(month_year) as null_count
 from interest_metrics;
-
+```
 /* The result is 8.37% and 1194 rows
 Since total null percentae is less than 10%, the data can be deleted. But its always advised to keep a backup of the data */
 
