@@ -51,8 +51,8 @@
 #### 3. What do you think we should do with these null values in the fresh_segments.interest_metrics
 
 
-*My recommendation would be to drop these records, Without interest_id and the date fields, there is no way to tell which interest the metrics belong to or when they were captured and thats the entire point of this dataset. Keeping them would only introduce noise into any time-based analysis downstream.
-Hence, dropping is a solution. However, its good to know the quantam first, we should document what percent we are removing before we drop.*
+My recommendation would be to drop these records, Without interest_id and the date fields, there is no way to tell which interest the metrics belong to or when they were captured and thats the entire point of this dataset. Keeping them would only introduce noise into any time-based analysis downstream.
+Hence, dropping is a solution. However, its good to know the quantam first, we should document what percent we are removing before we drop.
 
 ```sql
     SELECT
@@ -69,11 +69,13 @@ Hence, dropping is a solution. However, its good to know the quantam first, we s
 
 *Interprtation - The result is 8.37% and 1194 rows. Since total null percentage is less than 10%, the data can be deleted. But its always advised to keep a backup of the data.*
 
+Taking a backup - 
 ```SQL
     SELECT *
     INTO interest_metrics_back
     FROM interest_metrics;
 ```
+Deleting required records - 
 
 ```SQL
     DELETE FROM interest_metrics
@@ -81,14 +83,15 @@ Hence, dropping is a solution. However, its good to know the quantam first, we s
 ```
 
 #### 4. How many interest_id values exist in the fresh_segments.interest_metrics table but not in the fresh_segments.interest_map table? What about the other way around?
-    ```SQL
+    
+```SQL
     SELECT 
         COUNT(DISTINCT m.interest_id) AS not_in_interest_map_table, 
         COUNT(DISTINCT i.id) AS not_in_interest_metrics_table
     FROM interest_metrics m
     FULL OUTER JOIN interest_map i ON m.interest_id = i.id
     WHERE m.interest_id IS NULL or i.id IS NULL
-    ```
+```
 
 *Output -*
 
@@ -146,7 +149,7 @@ If the join were producing unexpected nulls or duplicate rows on this ID, that w
 *Interpretation - Returns clean rows with no unexpected nulls in the key columns, confirming the join logic is sound and we can proceed with this approach.*
 
 #### 7. Are there any records in your joined table where the month_year value is before the created_at value from the fresh_segments.interest_map table? Do you think these values are valid and why?
-    ```sql
+```sql
     WITH joined_table AS 
     (SELECT m.*, i.interest_name, i.interest_summary, i.created_at, i.last_modified
     FROM interest_map i
@@ -155,7 +158,7 @@ If the join were producing unexpected nulls or duplicate rows on this ID, that w
     SELECT COUNT(*) AS true_errors
     FROM joined_table
     WHERE month_year < created_at;
-     ```
+```
 
 *Output -*   
 | true_errors |
@@ -164,7 +167,7 @@ If the join were producing unexpected nulls or duplicate rows on this ID, that w
 
 
 *Interpretation - Yes, There are 188 records where month_year is earlier than created_at. This is probably because date for month_year for all the rows was set as '1', however they might have been created in the same month. To check the same -*
-
+```sql
     WITH joined_table AS
     (SELECT m.*, i.interest_name, i.interest_summary, i.created_at, i.last_modified
     FROM interest_map i
@@ -173,6 +176,7 @@ If the join were producing unexpected nulls or duplicate rows on this ID, that w
     SELECT COUNT(*) AS true_errors
     FROM joined_table
     WHERE month_year < DATETRUNC(month, created_at);
+```
 
 *Output -*
 | true_errors |
