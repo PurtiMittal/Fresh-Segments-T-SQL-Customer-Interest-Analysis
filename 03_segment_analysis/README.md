@@ -6,10 +6,10 @@
 
 ### 1. Using our filtered dataset by removing the interests with less than 6 months worth of data, which are the top 10 and bottom 10 interests which have the largest composition values in any month_year? Only use the maximum composition value for each interest but you must keep the corresponding month_year
 
-  First `CTE` filters to qualify interest (6 or more months)
-  Second `CTE` finds each interest's maximum composition row and its corresponding month_year using `RANK()` partitioned by interest_id (`RANK()` chosen over `ROW_NUMBER()` to avoid silently dropping interests that share the same peak composition value)
-  Third `CTE` ranks across all peak rows in both directions using `DENSE_RANK()` so tied values are all included.
-  Final `SELECT`: `DISTINCT` is added to handle cases where an interest ties on composition and month_year.
+- First `CTE` filters to qualify interest (6 or more months)
+- Second `CTE` finds each interest's maximum composition row and its corresponding month_year using `RANK()` partitioned by interest_id (`RANK()` chosen over `ROW_NUMBER()` to avoid silently dropping interests that share the same peak composition value)
+- Third `CTE` ranks across all peak rows in both directions using `DENSE_RANK()` so tied values are all included.
+- Final `SELECT`: `DISTINCT` is added to handle cases where an interest ties on composition and month_year.
 
   ```SQL
       WITH high_quality_interests AS(
