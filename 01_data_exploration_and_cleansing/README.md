@@ -1,8 +1,8 @@
 # Fresh-Segments-T-SQL-Customer-Interest-Analysis
 
-### Data Exploration and Cleansing
+## Data Exploration and Cleansing
 
-#### 1. Update the fresh_segments.interest_metrics table by modifying the month_year column to be a date data type with the start of the month
+### 1. Update the fresh_segments.interest_metrics table by modifying the month_year column to be a date data type with the start of the month
 
 ```sql
     UPDATE interest_metrics
@@ -14,7 +14,7 @@
     SET month_year = DATEFROMPARTS(year, month, 1);
 ```
 
-#### 2. What is count of records in the fresh_segments.interest_metrics for each month_year value sorted in chronological order (earliest to latest) with the null values appearing first?
+### 2. What is count of records in the fresh_segments.interest_metrics for each month_year value sorted in chronological order (earliest to latest) with the null values appearing first?
 ```sql
     SELECT month_year, COUNT(*) AS no_of_records
     FROM interest_metrics
@@ -47,7 +47,7 @@
 
 
 
-#### 3. What do you think we should do with these null values in the fresh_segments.interest_metrics
+### 3. What do you think we should do with these null values in the fresh_segments.interest_metrics
 
 
 My recommendation would be to drop these records, Without interest_id and the date fields, there is no way to tell which interest the metrics belong to or when they were captured and thats the entire point of this dataset. Keeping them would only introduce noise into any time-based analysis downstream.
@@ -81,7 +81,7 @@ Deleting required records -
     WHERE month_year IS NULL;
 ```
 
-#### 4. How many interest_id values exist in the fresh_segments.interest_metrics table but not in the fresh_segments.interest_map table? What about the other way around?
+### 4. How many interest_id values exist in the fresh_segments.interest_metrics table but not in the fresh_segments.interest_map table? What about the other way around?
     
 ```SQL
     SELECT 
@@ -102,7 +102,7 @@ Deleting required records -
 *Interpretation - No interest_id that is there that is in interest_metrics but not in interest_map table. 
 The other way round, There are 7 such interest_metrics that are in interest_map table but not in interest_metrics table.*
 
-#### 5. Summarise the id values in the fresh_segments.interest_map by its total record count in this table
+### 5. Summarise the id values in the fresh_segments.interest_map by its total record count in this table
 
 ```sql
     SELECT
@@ -117,7 +117,7 @@ The other way round, There are 7 such interest_metrics that are in interest_map 
 | 1209      | 1209               |
 
 
-#### 6. What sort of table join should we perform for our analysis and why? Check your logic by checking the rows where interest_id = 21246 in your joined output and include all columns from fresh_segments.interest_metrics and all columns from fresh_segments.interest_map except from the id column.
+### 6. What sort of table join should we perform for our analysis and why? Check your logic by checking the rows where interest_id = 21246 in your joined output and include all columns from fresh_segments.interest_metrics and all columns from fresh_segments.interest_map except from the id column.
 
 I would go with an Inner Join between interest_metrics and interest_map on interest_id = id. The reason is straightforward. Any interest_id in the metrics table that has no corresponding entry in the map table is unidentifiable. We can't name it, describe it or present it meaningfully to a client. Including it in the analysis would be like reporting on a segment that doesn't exist on paper.
 
@@ -147,7 +147,7 @@ If the join were producing unexpected nulls or duplicate rows on this ID, that w
 
 *Interpretation - Returns clean rows with no unexpected nulls in the key columns, confirming the join logic is sound and we can proceed with this approach.*
 
-#### 7. Are there any records in your joined table where the month_year value is before the created_at value from the fresh_segments.interest_map table? Do you think these values are valid and why?
+### 7. Are there any records in your joined table where the month_year value is before the created_at value from the fresh_segments.interest_map table? Do you think these values are valid and why?
 ```sql
     WITH joined_table AS 
     (SELECT m.*, i.interest_name, i.interest_summary, i.created_at, i.last_modified
