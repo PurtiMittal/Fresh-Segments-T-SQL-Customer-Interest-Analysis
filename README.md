@@ -25,36 +25,31 @@ Fresh-Segments-T-SQL-Customer-Interest-Analysis/
 |-- datasets/
 |    |-- interest_metrics.csv
 |    |-- interest_map.csv
-| [Download Here](./datasets/interest_map.csv) & [](./datasets/interest_metrics.csv)
 |
 |
 |--- Images/
 |    |-- data_type_modification_snip.png                 ← import settings reference
-| [View Here](./Images/)
 |
 |
 |-- 01_data_exploration_and_cleansing/   
 |    |-- data_exploration_and_cleansing.sql
 |    |-- README.md
-| [View Here](./01_data_exploration_and_cleansing/)
 |
 |
 |-- 02_interest_analysis/
 |    |-- interest_analysis.sql
 |    |-- README.md
-| [View Here](./02_interest_analysis/)
 |
 |
 |-- 03_segment_analysis/
 |    |-- segemnt_analysis.sql
 |    |-- README.md
-| [View Here](./03_segment_analysis/)
 |
 |
 |-- 04_index_analysis/
      |-- index_analysis.sql
      |-- README.md
-[View Here](./04_index_analysis/)
+
 ```
 
 Each folder has a .sql file to run that section in one go and a README with the query logic, outputs and interpretations for every question in that section.
