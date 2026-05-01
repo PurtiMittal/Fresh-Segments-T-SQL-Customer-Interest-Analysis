@@ -4,8 +4,8 @@
 
 ### 1. Which interests have been present in all month_year dates in our dataset?
 
- To find this, we count distinct month_year apperances per interest and compare against the total number of distinct months in the dataset usIng a subquery.
- Any interest matching the full month count has been consistently tracked throughtout the entire dataset period, there are our most reliable segments for trend analysis.
+ - To find this, we count distinct month_year apperances per interest and compare against the total number of distinct months in the dataset usIng a subquery.
+ - Any interest matching the full month count has been consistently tracked throughtout the entire dataset period, there are our most reliable segments for trend analysis.
 
 ```sql
      SELECT i.interest_id, m.interest_name, COUNT(DISTINCT month_year) AS total_months
@@ -17,30 +17,35 @@
 
 *Result - There are 480 interest_id that are present in all month_year dates in our dataset.*
 
+
  ### 2. Using this same total_months measure - calculate the cumulative percentage of all records starting at 14 months - which total_months value passes the 90% cumulative percentage value?
 
-Built in two CTE layers:
-First CTE counts how many months each interest appears across the datset.
-Second CTE groups those counts to find how  many interests share each total_months_value.
-The final SELECT adds a running cumulative sum and percentage using SUM() OVER(), ordered descending so we start from the most consistent interests (14 months) downward.
+- Built in two CTE layers:
+- First CTE counts how many months each interest appears across the datset.
+- Second CTE groups those counts to find how  many interests share each total_months_value.
+- The final SELECT adds a running cumulative sum and percentage using SUM() OVER(), ordered descending so we start from the most consistent interests (14 months) downward.
 
 ```sql
     WITH month_counts AS
-   (SELECT interest_id, COUNT(DISTINCT month_year) AS total_months 
-   FROM interest_metrics
-   GROUP BY interest_id)
+     (SELECT
+        interest_id,
+        COUNT(DISTINCT month_year) AS total_months 
+     FROM interest_metrics
+     GROUP BY interest_id)
 
-   , interest_counts as
-   (SELECT total_months, COUNT(interest_id) AS total_ids
-   FROM month_counts
-   GROUP BY total_months)
+   ,interest_counts as
+     (SELECT
+        total_months,
+        COUNT(interest_id) AS total_ids
+     FROM month_counts
+     GROUP BY total_months)
 
 
-  SELECT
-    total_months,
-    total_ids,
-    SUM(total_ids) OVER(ORDER BY total_months desc) AS cumulative_sum,
-    CAST(SUM(total_ids) OVER(ORDER BY total_months DESC)*100.0/SUM(total_ids) OVER() AS DECIMAL (5,2)) AS cumulative_perc
+   SELECT
+     total_months,
+     total_ids,
+     SUM(total_ids) OVER(ORDER BY total_months desc) AS cumulative_sum,
+     CAST(SUM(total_ids) OVER(ORDER BY total_months DESC)*100.0/SUM(total_ids) OVER() AS DECIMAL (5,2)) AS cumulative_perc
   FROM interest_counts;
 ```
 *Output -* 
@@ -66,8 +71,8 @@ The final SELECT adds a running cumulative sum and percentage using SUM() OVER()
 
 ### 3. If we were to remove all interest_id values which are lower than the total_months value we found in the previous question - how many total data points would we be removing?
 
-Used `DECLARE` to store the total record count upfront rather than nesting a subquery inside the `CAST` keeps the final `SELECT` cleaner and easier to read.
-The `CTE` identifies all interest_ids appearing in fewer than *6* distinct months and we join back to interest_metrics to count the actual rows they represent.
+- Used `DECLARE` to store the total record count upfront rather than nesting a subquery inside the `CAST` keeps the final `SELECT` cleaner and easier to read.
+- The `CTE` identifies all interest_ids appearing in fewer than *6* distinct months and we join back to interest_metrics to count the actual rows they represent.
 
 ```sql
    DECLARE @cnt int
@@ -100,19 +105,19 @@ The `CTE` identifies all interest_ids appearing in fewer than *6* distinct month
 
  ### 4. Does this decision make sense to remove these data points from a business perspective? Use an example where there are all 14 months present to a removed interest example for your arguments - think about what it means to have less months present from a segment perspective.
 
-Absolutely. Consider two interests from the dataset:
-"Order-in Eaters" appears across all 14 months. "Big Box Shoppers" appears in just 1.
-Order-in Eaters is exactly the kind of segment a client should be acting on as it represents consistent presence over 14 months that means the audience is real, trackable and reliable.
-Big box Shoppers on the other hand gives you nothing to work with. One month of data could be anything - a season blip or some trending thing.
-No client should be allocating budget based on that and Fresh Segments should not be presenting it as a menaingful segment.
-We are only removing 400 records which is 3.06% of the dataset. This is a very small price for a meaningfully cleaner analysis.
+- Absolutely. Consider two interests from the dataset:
+- "Order-in Eaters" appears across all 14 months. "Big Box Shoppers" appears in just 1.
+- Order-in Eaters is exactly the kind of segment a client should be acting on as it represents consistent presence over 14 months that means the audience is real, trackable and reliable.
+- Big box Shoppers on the other hand gives you nothing to work with. One month of data could be anything - a season blip or some trending thing.
+- No client should be allocating budget based on that and Fresh Segments should not be presenting it as a menaingful segment.
+- We are only removing 400 records which is 3.06% of the dataset. This is a very small price for a meaningfully cleaner analysis.
 
 
 ### 5. After removing these interests - how many unique interests are there for each month?
 
-The CTE filters to interests present in 6 or more months (our quality threshold)
-We then join back to interest_metrics and count distinct interests per month_year to see what the cleaned dataset looks like month by month.
-This gives us confidence that enough segment diversity remains in each month for the analysis to still be meaningful after the removal.
+- The CTE filters to interests present in 6 or more months (our quality threshold)
+- We then join back to interest_metrics and count distinct interests per month_year to see what the cleaned dataset looks like month by month.
+- This gives us confidence that enough segment diversity remains in each month for the analysis to still be meaningful after the removal.
 ```SQL
    WITH high_quality_interests AS
    (SELECT interest_id, COUNT(DISTINCT month_year) AS total_months 
