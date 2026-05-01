@@ -30,7 +30,7 @@
           INNER JOIN high_quality_interests h ON m.interest_id = h.interest_id
           INNER JOIN interest_map i ON m.interest_id = i.id)
 
-  , qualified_interests AS (
+    , qualified_interests AS (
         SELECT *,
           DENSE_RANK() OVER(ORDER BY composition ASC) AS rn_asc,
           DENSE_RANK() OVER(ORDER BY composition DESC) AS rn_desc
@@ -39,14 +39,14 @@
 
 
       SELECT DISTINCT
-        (CASE WHEN rn_asc <=10 THEN 'Bottom' ELSE 'Top' END) AS category,
-        interest_id,
-        interest_name,
-        month_year,
-        composition
+          (CASE WHEN rn_asc <=10 THEN 'Bottom' ELSE 'Top' END) AS category,
+          interest_id,
+          interest_name,
+          month_year,
+          composition
       FROM qualified_interests
       WHERE rn_asc <=10 OR rn_desc <=10
-```
+
 *Output-*
 
 | category | interest_id | interest_name                     | month_year | composition |
